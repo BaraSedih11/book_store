@@ -1,0 +1,21 @@
+{% extends 'frontend/base.html' %} {% block title %}Bazarcom - Home{% endblock
+%} {% block content %}
+<div class="text-center">
+  <h1 class="display-4 mb-4">Welcome to Bazarcom</h1>
+  <p class="lead">Your online marketplace for books and magazines</p>
+
+  <div class="row mt-5">
+    <div class="col-md-6 offset-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Browse our collection</h5>
+          <p class="card-text">
+            Discover a wide range of books on various topics.
+          </p>
+          <a href="{% url 'books' %}" class="btn btn-primary">View Books</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

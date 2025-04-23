@@ -1,0 +1,5 @@
+# Common packages for all services
+pip install django==4.2.7
+pip install djangorestframework==3.14.0
+pip install requests==2.31.0
+pip install django-cors-headers==4.3.0

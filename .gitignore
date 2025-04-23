@@ -1,0 +1,21 @@
+# Python virtual environments
+*/*/catalog_env/
+*/*/frontend_env/
+*/*/gateway_env/
+*/*/order_env/
+
+# Or more specifically:
+catalog_service/catalog_env/
+frontend_service/frontend_env/
+gateway_service/gateway_env/
+order_service/order_env/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/

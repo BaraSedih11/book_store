@@ -1,0 +1,90 @@
+{% extends 'frontend/base.html' %} {% block title %}Bazarcom - Books{% endblock
+%} {% block content %}
+<h2 class="mb-4">Available Books</h2>
+
+{% if error %}
+<div class="alert alert-danger">Error: {{ error }}</div>
+{% else %} {% if books %}
+<div class="row">
+  {% for book in books %}
+  <div class="col-md-4 mb-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">{{ book.title }}</h5>
+        <p class="card-text">
+          <strong>Topic:</strong> {{ book.topic|default:"Not specified" }}<br />
+          <strong>Price:</strong> ${{ book.price }}<br />
+          <strong>Available:</strong> {{ book.quantity }}
+        </p>
+        <button
+          class="btn btn-sm btn-success purchase-btn"
+          data-book-id="{{ book.id }}"
+        >
+          Purchase
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">No books available at the moment.</div>
+{% endif %} {% endif %} {% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const purchaseButtons = document.querySelectorAll(".purchase-btn");
+
+    purchaseButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const bookId = this.getAttribute("data-book-id");
+
+        // Disable the button to prevent multiple clicks
+        this.disabled = true;
+        this.textContent = "Processing...";
+
+        // Send purchase request to gateway via frontend
+        fetch(`/api/purchase/${bookId}/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.message) {
+              alert(`Success: ${data.message}`);
+              // Reload page to update quantities
+              window.location.reload();
+            } else {
+              alert(`Error: ${data.error || "Unknown error"}`);
+              this.disabled = false;
+              this.textContent = "Purchase";
+            }
+          })
+          .catch((error) => {
+            alert("Error: " + error);
+            this.disabled = false;
+            this.textContent = "Purchase";
+          });
+      });
+    });
+
+    // Function to get CSRF token
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === name + "=") {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,74 @@
+# docker-compose.yml
+version: "3"
+
+services:
+  catalog_service:
+    build: ./catalog_service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./catalog_service:/app
+    command: >
+      bash -c "python manage.py makemigrations &&
+               python manage.py migrate &&
+               python manage.py load_initial_data &&
+               python manage.py runserver 0.0.0.0:8000"
+    networks:
+      - bazarcom_network
+
+  order_service:
+    build: ./order_service
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./order_service:/app
+    command: >
+      bash -c "python manage.py makemigrations &&
+               python manage.py migrate &&
+               python manage.py runserver 0.0.0.0:8001"
+    depends_on:
+      - catalog_service
+    networks:
+      - bazarcom_network
+    environment:
+      - CATALOG_SERVICE_URL=http://catalog_service:8000/catalog
+
+  gateway_service:
+    build: ./gateway_service
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./gateway_service:/app
+    command: >
+      bash -c "python manage.py makemigrations &&
+               python manage.py migrate &&
+               python manage.py runserver 0.0.0.0:8002"
+    depends_on:
+      - catalog_service
+      - order_service
+    networks:
+      - bazarcom_network
+    environment:
+      - CATALOG_SERVICE_URL=http://catalog_service:8000/catalog
+      - ORDER_SERVICE_URL=http://order_service:8001/order
+
+  frontend_service:
+    build: ./frontend_service
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./frontend_service:/app
+    command: >
+      bash -c "python manage.py makemigrations &&
+               python manage.py migrate &&
+               python manage.py runserver 0.0.0.0:8003"
+    depends_on:
+      - gateway_service
+    networks:
+      - bazarcom_network
+    environment:
+      - GATEWAY_SERVICE_URL=http://gateway_service:8002/gateway
+
+networks:
+  bazarcom_network:
+    driver: bridge
